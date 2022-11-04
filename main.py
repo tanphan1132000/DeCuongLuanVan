@@ -7,9 +7,9 @@ import serial.tools.list_ports
 import read_sensors
 import pump_control
 
-AIO_FEED_ID = ["doanktmt.temp"]
-AIO_USERNAME = "DoAnBachKhoa"
-AIO_KEY = "aio_uUiN12G52bUDlFQejB2zxhzesNUY"
+AIO_FEED_ID = []
+AIO_USERNAME = ""
+AIO_KEY = ""
 
 def connected(client):
     print("Ket noi thanh cong ...")
