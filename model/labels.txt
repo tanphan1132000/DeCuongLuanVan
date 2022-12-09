@@ -1,2 +1,3 @@
-Good cucumber
-Disease cucumber
+0 Binh thuong
+1 Benh suong mai
+2 Benh phan trang

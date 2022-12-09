@@ -6,10 +6,16 @@ import port
 import serial.tools.list_ports
 import read_sensors
 import pump_control
+import model
 
-AIO_FEED_ID = []
-AIO_USERNAME = ""
-AIO_KEY = ""
+AIO_FEED_ID = ["doanktmt.temp", "doanktmt.humi", "doanktmt.pump"]
+AIO_USERNAME = "DoAnBachKhoa"
+AIO_KEY = "aio_EiYf93DMpKgrI4xdbS9zj36eFIt1"
+
+portName = port.getPort()
+print("Port: " + portName)
+if portName != "None":
+    ser = serial.Serial(port=portName, baudrate=9600)
 
 def connected(client):
     print("Ket noi thanh cong ...")
@@ -24,12 +30,15 @@ def disconnected(client):
     sys.exit (1)
 
 def message(client , feed_id , payload):
-    print("Payload: " + payload)
-    # if feed_id == "actuator1":
-    #     if payload == "1":
-    #         setDevice1(True)
-    #     else:
-    #         setDevice1(False)
+    if feed_id == "doanktmt.temp": print("Temperature: " + payload)
+    elif feed_id == "doanktmt.humi": print("Humidity: " + payload)
+    elif feed_id == "doanktmt.pump":
+        if payload == "1":
+            pump_control.setDevice1(True, ser)
+            print("Pump: ON")
+        else:
+            pump_control.setDevice1(False, ser)
+            print("Pump: OFF")
 
 
 client = MQTTClient(AIO_USERNAME , AIO_KEY)
@@ -40,14 +49,14 @@ client.on_subscribe = subscribe
 client.connect()
 client.loop_background()
 
-portName = port.getPort()
-print("Port: " + portName)
-if portName != "None":
-    ser = serial.Serial(port=portName, baudrate=9600)
+# while True:
+    # value_temp = read_sensors.readTemperature(ser, port.serial_read_data)/10
+    # client.publish("doanktmt.temp", value_temp)
+    # time.sleep(2)
+    # value_humi = read_sensors.readMoisture(ser, port.serial_read_data)/10
+    # client.publish("doanktmt.humi", value_humi)
+    # time.sleep(2)
 
-while True:
-    print("Running...")
-    time.sleep(5)
-    # image_capture()
-    # ai_result = image_detector()
+model.image_capture()
+ai_result = model.image_detector()
     # client.publish("visiondetection", ai_result)
