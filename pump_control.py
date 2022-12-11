@@ -1,3 +1,5 @@
+import time
+
 print("Test Actuators")
 
 relay1_ON  = [0, 6, 0, 0, 0, 255, 200, 91]

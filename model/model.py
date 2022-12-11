@@ -4,11 +4,13 @@ import numpy as np
 import cv2
 
 cam = cv2.VideoCapture(0)
-model = load_model('keras_model.h5')
-
+model = load_model('model/keras_model.h5')
+model.compile()
 def image_capture():
-    ret,frame = cam.read()
-    cv2.imwrite ("abc.png",frame)
+    if cam.isOpened():
+        ret,frame = cam.read()
+        if ret:
+            cv2.imwrite ('leaf.png',frame)
 
 def image_detector():
     # Create the array of the right shape to feed into the keras model
@@ -16,7 +18,7 @@ def image_detector():
     # determined by the first position in the shape tuple, in this case 1.
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     # Replace this with the path to your image
-    image = Image.open('abc.png')
+    image = Image.open('leaf.png')
     #resize the image to a 224x224 with the same strategy as in TM2:
     #resizing the image to be at least 224x224 and then cropping from the center
     size = (224, 224)
@@ -24,6 +26,8 @@ def image_detector():
 
     #turn the image into a numpy array
     image_array = np.asarray(image)
+    #show img
+    image.show()
     # Normalize the image
     normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
     # Load the image into the array
@@ -45,7 +49,9 @@ def image_detector():
             max_index = i
     print(max_index, max_confidence)
 
-    file = open("labels.txt",encoding="utf8")
+    file = open("model/labels.txt",encoding="utf8")
     data = file.read().split("\n")
-    print("AI Result: ", data[max_index])
-    return data[max_index]
+    data = data[max_index]
+    index = data.find(' ')
+    print(f"AI Result: {data[index + 1:]}")
+    return data[index + 1:]

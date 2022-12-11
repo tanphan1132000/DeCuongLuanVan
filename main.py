@@ -4,18 +4,25 @@ from Adafruit_IO import MQTTClient
 import time
 import port
 import serial.tools.list_ports
+import serial.rs485
 import read_sensors
 import pump_control
-import model
+from model import model
 
-AIO_FEED_ID = ["doanktmt.temp", "doanktmt.humi", "doanktmt.pump"]
+AIO_FEED_ID = ["doanktmt.pump"]
 AIO_USERNAME = "DoAnBachKhoa"
 AIO_KEY = "aio_EiYf93DMpKgrI4xdbS9zj36eFIt1"
+
+count = 1
+count_detect = 1
+isPumpSignal = False
+isPump = False
 
 portName = port.getPort()
 print("Port: " + portName)
 if portName != "None":
     ser = serial.Serial(port=portName, baudrate=9600)
+    ser.rs485_mode = serial.rs485.RS485Settings()
 
 def connected(client):
     print("Ket noi thanh cong ...")
@@ -30,14 +37,14 @@ def disconnected(client):
     sys.exit (1)
 
 def message(client , feed_id , payload):
-    if feed_id == "doanktmt.temp": print("Temperature: " + payload)
-    elif feed_id == "doanktmt.humi": print("Humidity: " + payload)
-    elif feed_id == "doanktmt.pump":
+    if feed_id == "doanktmt.pump":
+        global isPumpSignal, isPump
+        isPumpSignal = True
         if payload == "1":
-            pump_control.setDevice1(True, ser)
+            isPump = True
             print("Pump: ON")
         else:
-            pump_control.setDevice1(False, ser)
+            isPump = False
             print("Pump: OFF")
 
 
@@ -49,14 +56,29 @@ client.on_subscribe = subscribe
 client.connect()
 client.loop_background()
 
-# while True:
-    # value_temp = read_sensors.readTemperature(ser, port.serial_read_data)/10
-    # client.publish("doanktmt.temp", value_temp)
-    # time.sleep(2)
-    # value_humi = read_sensors.readMoisture(ser, port.serial_read_data)/10
-    # client.publish("doanktmt.humi", value_humi)
-    # time.sleep(2)
+while True:
+    if count == 50:
+        value_temp = read_sensors.readTemperature(ser, port.serial_read_data)/10
+        print(f"Temperature: {value_temp}°C")
+        client.publish("doanktmt.temp", value_temp)
+    # if count == 80:
+        value_humi = read_sensors.readMoisture(ser, port.serial_read_data)/10
+        print(f"Humidity: {value_humi}%")
+        client.publish("doanktmt.humi", value_humi)
+        count = 0
+    if isPumpSignal:
+        if isPump:
+            pump_control.setDevice2(True, ser)
+        else:
+            pump_control.setDevice2(False, ser)
+        isPumpSignal = False
+    if count_detect == 100:
+        print('Detecting...')
+        model.image_capture()
+        ai_result = model.image_detector()
+        client.publish("doanktmt.plantdetection", ai_result)
+        count_detect = 0
 
-model.image_capture()
-ai_result = model.image_detector()
-    # client.publish("visiondetection", ai_result)
+    count_detect += 1
+    count += 1
+    time.sleep(0.1)
