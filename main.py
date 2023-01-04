@@ -12,7 +12,7 @@ KEY_RELAY_1 = "doanktmt.pump"
 KEY_RELAY_2 = "doanktmt.relay-2"
 AIO_FEED_ID = [KEY_RELAY_1, KEY_RELAY_2]
 AIO_USERNAME = "DoAnBachKhoa"
-AIO_KEY = "aio_TkNZ40yaqXSRSjw2xYcSDNdjjRk9"
+AIO_KEY = ""
 
 count = 1
 count_detect = 1
