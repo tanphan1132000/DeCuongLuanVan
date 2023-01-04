@@ -49,6 +49,9 @@ def image_detector():
             max_index = i
     print(max_index, max_confidence)
 
+    if max_confidence < 0.7:
+        return 'Doi tuong khong phai cay dua leo'
+
     file = open("model/labels.txt",encoding="utf8")
     data = file.read().split("\n")
     data = data[max_index]
